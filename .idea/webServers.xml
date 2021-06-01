@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="3c961607-9cef-4a24-9d2d-24076cf99424" name="raspberry">
+        <fileTransfer rootFolder="//home/pi/go/src" accessType="SFTP" host="192.168.3.100" port="22" sshConfigId="57c87e74-c3db-46be-a2ab-9a43e3704017" sshConfig="pi@192.168.3.100:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="20e1aa68-2fc1-4766-ba22-40378cf3c90e" name="baiduCloud">
+        <fileTransfer rootFolder="/home/gopath/src" accessType="SFTP" host="106.12.88.113" port="22" sshConfigId="e0ae2dcc-2702-4550-ac73-7b3da30db1fa" sshConfig="root@106.12.88.113:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

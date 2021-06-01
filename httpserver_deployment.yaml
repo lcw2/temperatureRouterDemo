@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpserver-test
+  labels:
+    app: httpserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpserver
+  template:
+    metadata:
+      labels:
+        app: httpserver
+    spec:
+      nodeSelector:
+        name: "master"
+      hostNetwork: true
+      containers:
+        - name: httpserver
+          image: lcw2/temperature_httpserver:v1.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080

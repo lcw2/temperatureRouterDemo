@@ -1,0 +1,11 @@
+apiVersion: rules.kubeedge.io/v1
+kind: Rule
+metadata:
+  name: temperature-rule-eventbus-rest
+  labels:
+    description: rule-about-collecting-temperature-and0humidity
+spec:
+  source: "temperature-eventbus"
+  sourceResource: {"topic": "device/temperature/and/humidity","node_name": "raspberrypi"}
+  target: "temperature-rest"
+  targetResource: {"resource":"http://127.0.0.1:8080/environment"}

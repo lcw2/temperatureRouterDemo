@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temperature-test
+  labels:
+    app: temperaturehumidity
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: temperaturehumidity
+  template:
+    metadata:
+      labels:
+        app: temperaturehumidity
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        name: "raspberrypi"
+      containers:
+        - name: temperature
+          image: lcw2/temperature-test:v1
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true

@@ -1,0 +1,9 @@
+apiVersion: rules.kubeedge.io/v1
+kind: RuleEndpoint
+metadata:
+  name: temperature-eventbus
+  labels:
+    description: temperature-and-humidity
+spec:
+  ruleEndpointType: "eventbus"
+  properties: {}
