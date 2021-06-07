@@ -28,12 +28,19 @@ type ValuesMessage struct {
 	Humidity    string `json:"humidity"`
 }
 
+type OperationMessage struct {
+	Operation  string `json:"operation"`
+}
+
+var operation string
+
 func main() {
 	defer logger.FinalizeLogger()
 
 	logger.ChangePackageLogLevel("dht", logger.InfoLevel)
+
 	//create context with cancellation possibility
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx , cancel := context.WithCancel(context.Background())
 	done := make(chan struct{})
 	defer close(done)
 	//build actual signal list to control
@@ -43,41 +50,47 @@ func main() {
 	}
 
 	// run goroutine waiting for OS terminate events, including keyboard Ctrl+C
-	shell.CloseContextOnSignals(cancel, done, signals...)
+	shell.CloseContextOnSignals(cancel,done ,signals...)
 
-	sensorType := dht.DHT11
-	pin := 11
-	totalRetried := 0
-	totalMeasured := 0
-	totalFailed := 0
-	term := false
 
 	cli := connectToMqtt()
+	topic := "operation"
+	subscribeFromMqtt(cli,topic)
 
+	// collect data and publish
+	CollectTemperationAndHumidity(ctx ,cli)
+
+	lg.Info("exited")
+}
+
+
+func CollectTemperationAndHumidity(ctx context.Context, cli *client.Client) {
+	sensorType := dht.DHT11
+	pin := 11
+	term := false
 	for {
-		temperature, humidity, retried, err :=
-			dht.ReadDHTxxWithContextAndRetry(ctx, sensorType, pin, false, 10)
-		totalMeasured++
-		totalRetried += retried
-		if err != nil && ctx.Err() == nil {
-			totalFailed++
-			lg.Error(err)
-			continue
-		}
+		if operation == "start"{
+			temperature, humidity, retried, err :=
+				dht.ReadDHTxxWithContextAndRetry(ctx, sensorType, pin, false, 10)
+			if err != nil && ctx.Err() == nil {
+				lg.Error(err)
+				continue
+			}
 
-		//print temperature and humidity
-		if ctx.Err() == nil {
-			lg.Infof("Sensor = %v: Temperature = %v*C, Humidity= %v%% (retried %d times)", sensorType, temperature, humidity, retried)
-		}
+			//print temperature and humidity
+			if ctx.Err() == nil {
+				lg.Infof("Sensor = %v: Temperature = %v*C, Humidity= %v%% (retried %d times)", sensorType, temperature, humidity, retried)
+			}
 
-		//publish temperature
-		publishToMqtt(cli, temperature, humidity)
+			//publish temperature
+			publishToMqtt(cli, temperature, humidity)
+		}
 
 		select {
 		case <-ctx.Done():
 			lg.Errorf("Termination pending: %s", ctx.Err())
 			term = true
-		case <-time.After(2000 * time.Millisecond):
+		case <-time.After(3000 * time.Millisecond):
 		}
 
 		if term {
@@ -85,7 +98,29 @@ func main() {
 		}
 
 	}
-	lg.Info("exited")
+}
+
+func onMessage(topicName, message []byte){
+	var data OperationMessage
+	_ = json.Unmarshal(message,&data)
+
+	operation = data.Operation
+
+}
+
+func subscribeFromMqtt(cli *client.Client,topic string) {
+	err := cli.Subscribe(&client.SubscribeOptions{
+		SubReqs: []*client.SubReq{
+			&client.SubReq{
+				TopicFilter: []byte(topic),
+				QoS: mqtt.QoS0,
+				Handler: onMessage,
+			},
+		},
+	})
+	if err != nil{
+		panic(err)
+	}
 }
 
 func publishToMqtt(cli *client.Client, temperature float32, humidity float32) {

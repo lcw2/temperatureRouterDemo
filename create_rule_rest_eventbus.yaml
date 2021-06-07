@@ -1,0 +1,11 @@
+apiVersion: rules.kubeedge.io/v1
+kind: Rule
+metadata:
+  name: operationrule
+  labels:
+    description: temperation-operation
+spec:
+  source: "temperature-rest"
+  sourceResource: {"path":"/operation"}
+  target: "temperature-eventbus"
+  targetResource: {"topic":"operation"}

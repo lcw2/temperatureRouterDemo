@@ -14,7 +14,7 @@ spec:
           - key: ''
             operator: In
             values:
-              - edge-node
+              - raspberrypi
 status:
   twins:
     - propertyName: temperature-status
